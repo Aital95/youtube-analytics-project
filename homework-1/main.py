@@ -1,7 +1,8 @@
 from src.channel import Channel
 
 if __name__ == '__main__':
-    vdud = Channel('UCMCgOm8GZkHp8zJ6l7_hIuA')
+    api_key = "AIzaSyCyopXTyQGW4oi2LmoaPfl8IVWsns_A_98"
+    vdud = Channel('UCMCgOm8GZkHp8zJ6l7_hIuA', api_key)
     vdud.print_info()
 
     """
