@@ -1,4 +1,5 @@
 import os
+import json
 
 from googleapiclient.discovery import build
 
@@ -16,6 +17,7 @@ class Channel:
         self.view_count = None
         self.subscriber_count = None
         self.video_count = None
+        self.url = f'https://www.youtube.com/channel/{channel_id}'
 
         request = youtube.channels().list(
             part='snippet,statistics',
@@ -42,3 +44,22 @@ class Channel:
                f'Количество просмотров: {self.view_count}\nКоличество подписчиков: {self.subscriber_count}\n' \
                f'Количество видео: {self.video_count}'
         return info
+
+    @classmethod
+    def get_service(cls):
+        return youtube
+
+    def to_json(self, filename: str):
+        data = {
+            'id': self.id,
+            'title': self.title,
+            'description': self.description,
+            'custom_url': self.custom_url,
+            'view_count': self.view_count,
+            'subscriber_count': self.subscriber_count,
+            'video_count': self.video_count,
+            'url': self.url
+        }
+
+        with open(filename, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
