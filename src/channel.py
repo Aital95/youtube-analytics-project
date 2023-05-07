@@ -1,8 +1,14 @@
+import os
+
 from googleapiclient.discovery import build
+
+api_key: str = os.getenv('YT_API_KEY')
+
+youtube = build('youtube', 'v3', developerKey=api_key)
 
 
 class Channel:
-    def __init__(self, channel_id: str, api_key: str):
+    def __init__(self, channel_id: str):
         self.id = channel_id
         self.title = None
         self.description = None
@@ -11,7 +17,6 @@ class Channel:
         self.subscriber_count = None
         self.video_count = None
 
-        youtube = build('youtube', 'v3', developerKey=api_key)
         request = youtube.channels().list(
             part='snippet,statistics',
             id=channel_id
@@ -33,9 +38,7 @@ class Channel:
             self.video_count = channel['statistics']['videoCount']
 
     def print_info(self):
-        print(f'Название канала: {self.title}')
-        print(f'Описание канала: {self.description}')
-        print(f'Пользовательский URL: {self.custom_url}')
-        print(f'Количество просмотров: {self.view_count}')
-        print(f'Количество подписчиков: {self.subscriber_count}')
-        print(f'Количество видео: {self.video_count}')
+        info = f'Название канала: {self.title}\nОписание: {self.description}\nПользовательский URL: {self.custom_url}\n' \
+               f'Количество просмотров: {self.view_count}\nКоличество подписчиков: {self.subscriber_count}\n' \
+               f'Количество видео: {self.video_count}'
+        return info
