@@ -1,7 +1,6 @@
 import datetime
 import requests
 
-
 class PlayList:
     def __init__(self, playlist_id):
         self.playlist_id = playlist_id
@@ -11,54 +10,62 @@ class PlayList:
         self._fetch_playlist_info()
 
     def _fetch_playlist_info(self):
-        api_url = f"https://www.googleapis.com/youtube/v3/playlists?part=snippet&id={self.playlist_id}&key=YT_API_KEY"
-        response = requests.get(api_url)
+        api_key = '<YOTUBE_API_KEY>'
+        playlist_url = f"https://www.googleapis.com/youtube/v3/playlists?part=snippet&id={self.playlist_id}&key={api_key}"
+
+        response = requests.get(playlist_url)
         data = response.json()
 
-        if "items" in data and len(data["items"]) > 0:
-            playlist_data = data["items"][0]
-            self.title = playlist_data["snippet"]["title"]
+        if 'items' in data:
+            playlist_info = data['items'][0]['snippet']
+            self.title = playlist_info['title']
             self.url = f"https://www.youtube.com/playlist?list={self.playlist_id}"
-        else:
-            raise ValueError("Invalid playlist ID")
 
     @property
     def total_duration(self):
-        api_url = f"https://www.googleapis.com/youtube/v3/playlistItems?part=contentDetails&playlistId={self.playlist_id}&key=YT_API_KEY"
-        response = requests.get(api_url)
+        api_key = '<YOTUBE_API_KEY>'
+        videos_url = f"https://www.googleapis.com/youtube/v3/playlistItems?part=contentDetails&playlistId={self.playlist_id}&key={api_key}"
+
+        response = requests.get(videos_url)
         data = response.json()
 
         total_duration = datetime.timedelta()
 
-        if "items" in data:
-            for item in data["items"]:
-                duration = item["contentDetails"]["duration"]
-                parsed_duration = self._parse_duration(duration)
-                total_duration += parsed_duration
+        if 'items' in data:
+            for item in data['items']:
+                duration = item['contentDetails']['duration']
+                video_duration = datetime.timedelta()
+                for time_unit in ['H', 'M', 'S']:
+                    if time_unit in duration:
+                        time_value = int(duration.split(time_unit)[0])
+                        if time_unit == 'H':
+                            video_duration += datetime.timedelta(hours=time_value)
+                        elif time_unit == 'M':
+                            video_duration += datetime.timedelta(minutes=time_value)
+                        elif time_unit == 'S':
+                            video_duration += datetime.timedelta(seconds=time_value)
+                total_duration += video_duration
 
         return total_duration
 
-    def _parse_duration(self, duration):
-        time_values = duration.split("T")[-1]
-        hours, minutes, seconds = map(int, time_values[:-1].split(":"))
-        return datetime.timedelta(hours=hours, minutes=minutes, seconds=seconds)
-
     def show_best_video(self):
-        api_url = f"https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId={self.playlist_id}&key=YT_API_KEY"
-        response = requests.get(api_url)
+        api_key = '<YOTUBE_API_KEY>'
+        videos_url = f"https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId={self.playlist_id}&key={api_key}"
+
+        response = requests.get(videos_url)
         data = response.json()
 
         best_video = None
         max_likes = 0
 
-        if "items" in data:
-            for item in data["items"]:
-                likes = int(item["snippet"]["statistics"]["likeCount"])
+        if 'items' in data:
+            for item in data['items']:
+                likes = item['snippet']['statistics']['likeCount']
                 if likes > max_likes:
                     max_likes = likes
-                    best_video = item["snippet"]["resourceId"]["videoId"]
+                    best_video = item['snippet']['resourceId']['videoId']
 
-        if best_video is not None:
+        if best_video:
             return f"https://youtu.be/{best_video}"
-        else:
-            return None
+
+        return None
