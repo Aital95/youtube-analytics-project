@@ -56,7 +56,7 @@ class PlayList:
     def show_best_video(self) -> str:
         playlist_videos = youtube.playlistItems().list(
             playlistId=self.playlist_id,
-            part='contentDetails,statistics',
+            part='contentDetails',
             maxResults=50
         ).execute()
 
